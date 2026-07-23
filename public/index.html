@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ForgeLink | AI Sourcing for Engineering</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #faf8f3;          /* ivory */
+    --panel: #ffffff;
+    --panel-2: #f3f1ea;     /* soft creme */
+    --border: #e2ded2;
+    --text: #23282b;        /* graphite */
+    --muted: #6e7378;
+    --accent: #2e5e4e;      /* engineering green */
+    --accent-2: #1d3d32;    /* deep green for gradients */
+    --accent-grad: linear-gradient(135deg, #35705c 0%, #1d3d32 100%);
+    --accent-soft: rgba(46, 94, 78, 0.08);
+    --green: #2e7d4f;
+    --red: #b3362d;
+    --radius: 10px;
+    --font-sans: "IBM Plex Sans", -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    --grid-line: rgba(46, 94, 78, 0.055);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--text);
+    font: 15px/1.55 var(--font-sans);
+    height: 100vh; overflow: hidden;
+  }
+  button { font: inherit; cursor: pointer; }
+  input, select, textarea {
+    font: inherit; color: var(--text); background: var(--panel-2);
+    border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px; width: 100%;
+  }
+  input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent-soft); border-color: var(--accent); }
+  .btn {
+    background: var(--accent-grad); color: #ffffff; border: none; border-radius: 8px;
+    padding: 10px 16px; font-weight: 600; letter-spacing: 0.01em;
+    box-shadow: 0 2px 8px rgba(29, 61, 50, 0.22);
+    transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
+  }
+  .btn:hover { filter: brightness(1.07); transform: translateY(-1px); box-shadow: 0 4px 14px rgba(29, 61, 50, 0.28); }
+  .btn:disabled { opacity: 0.5; cursor: default; }
+  .btn-ghost {
+    background: transparent; color: var(--muted); border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px 14px;
+  }
+  .btn-ghost:hover { color: var(--text); border-color: var(--muted); }
+  .hidden { display: none !important; }
+
+  /* ---------- auth (hero) ---------- */
+  #auth-view {
+    height: 100vh; display: flex; align-items: center; justify-content: space-between;
+    gap: 56px; padding: 48px 7%;
+    background:
+      linear-gradient(100deg, rgba(18, 24, 22, 0.82) 0%, rgba(18, 24, 22, 0.55) 55%, rgba(18, 24, 22, 0.35) 100%),
+      url("hero.jpg") center / cover no-repeat, #14181a;
+    overflow: auto;
+  }
+  .hero-copy { color: #ffffff; max-width: 560px; }
+  .hero-copy .logo { font-size: 24px; margin-bottom: 26px; }
+  .hero-copy .logo span {
+    background: linear-gradient(135deg, #8ec8ad 0%, #4e937a 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .hero-copy h1 { font-size: 40px; font-weight: 700; line-height: 1.18; letter-spacing: -0.02em; margin-bottom: 14px; }
+  .hero-copy p { font-size: 16.5px; color: rgba(255, 255, 255, 0.82); max-width: 460px; }
+  .hero-points { margin-top: 26px; display: grid; gap: 10px; }
+  .hero-points div {
+    font-family: var(--font-mono); font-size: 12.5px; letter-spacing: 0.03em;
+    color: rgba(255, 255, 255, 0.88);
+    padding-left: 16px; border-left: 2px solid #4e937a;
+  }
+  @media (max-width: 980px) {
+    #auth-view { flex-direction: column; justify-content: center; gap: 28px; padding: 32px 24px; }
+    .hero-copy h1 { font-size: 28px; }
+    .hero-points { display: none; }
+  }
+  .auth-card {
+    width: 100%; max-width: 440px; flex-shrink: 0; background: var(--panel);
+    border: 1px solid var(--border); border-radius: 16px; padding: 32px;
+    box-shadow: 0 18px 48px rgba(10, 14, 12, 0.38);
+  }
+  .card-label {
+    font-family: var(--font-mono); font-size: 11px; text-transform: uppercase;
+    letter-spacing: 0.1em; color: var(--accent); margin-bottom: 4px;
+  }
+  .logo { font-family: var(--font-mono); font-size: 21px; font-weight: 600; letter-spacing: -0.5px; }
+  .logo span {
+    background: var(--accent-grad);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .tagline { color: var(--muted); font-size: 13.5px; margin: 6px 0 22px; }
+  .field { margin-bottom: 14px; }
+  .field label {
+    display: block; font-family: var(--font-mono); font-size: 11px;
+    text-transform: uppercase; letter-spacing: 0.07em;
+    color: var(--muted); margin-bottom: 5px;
+  }
+  .auth-switch { margin-top: 16px; font-size: 13.5px; color: var(--muted); text-align: center; }
+  .auth-switch a { color: var(--accent); cursor: pointer; text-decoration: none; }
+  .form-error { color: var(--red); font-size: 13.5px; margin: 4px 0 10px; min-height: 18px; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  /* ---------- app shell ---------- */
+  #app-view { height: 100vh; display: flex; flex-direction: column; }
+  header {
+    display: flex; align-items: center; gap: 14px; padding: 12px 20px;
+    background: #23282b; flex-shrink: 0;
+  }
+  header .logo { color: #ffffff; }
+  header .logo span {
+    background: linear-gradient(135deg, #8ec8ad 0%, #4e937a 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  header .company { color: #aab1b6; font-size: 13.5px; margin-left: auto; }
+  header .btn-ghost { color: #c8cdd1; border-color: rgba(255, 255, 255, 0.22); }
+  header .btn-ghost:hover { color: #ffffff; border-color: rgba(255, 255, 255, 0.5); }
+  main { flex: 1; display: flex; min-height: 0; }
+
+  /* ---------- chat ---------- */
+  #chat-panel { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  #chat-scroll {
+    flex: 1; overflow-y: auto; padding: 24px 8%;
+    background:
+      linear-gradient(rgba(250,248,243,0.82), rgba(250,248,243,0.82)),
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px),
+      var(--bg);
+    background-size: auto, 36px 36px, 36px 36px, auto;
+  }
+  .msg { max-width: 720px; margin: 0 auto 18px; }
+  .msg .who { font-family: var(--font-mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.09em; color: var(--muted); margin-bottom: 4px; }
+  .msg.user .bubble {
+    background: var(--accent-soft); border: 1px solid rgba(46,94,78,0.25);
+    border-radius: var(--radius); padding: 10px 14px; display: inline-block;
+  }
+  .msg.assistant .bubble { padding: 2px 0; }
+  .bubble p { margin-bottom: 10px; }
+  .bubble p:last-child { margin-bottom: 0; }
+  .bubble ul { margin: 4px 0 10px 20px; }
+  .bubble li { margin-bottom: 4px; }
+  .bubble code { background: var(--panel-2); padding: 1px 5px; border-radius: 4px; font-size: 13px; }
+  .steps { max-width: 720px; margin: 0 auto 12px; display: flex; flex-wrap: wrap; gap: 6px; }
+  .step-chip {
+    font-family: var(--font-mono); font-size: 11px; color: var(--muted); background: var(--panel);
+    border: 1px solid var(--border); border-radius: 999px; padding: 3px 10px;
+  }
+  .step-chip b { color: var(--text); font-weight: 600; }
+  #welcome { max-width: 720px; margin: 8vh auto 0; text-align: center; color: var(--muted); }
+  #welcome h2 { color: var(--text); font-size: 26px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 8px; }
+  .suggestions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 18px; }
+  .suggestion {
+    background: var(--panel); border: 1px solid var(--border); color: var(--text);
+    border-radius: 999px; padding: 8px 14px; font-size: 13.5px;
+    transition: border-color 0.12s ease, box-shadow 0.12s ease, transform 0.12s ease;
+  }
+  .suggestion:hover {
+    border-color: var(--accent); transform: translateY(-1px);
+    box-shadow: 0 3px 10px rgba(35, 40, 43, 0.08);
+  }
+  #composer {
+    flex-shrink: 0; padding: 14px 8% 20px; border-top: 1px solid var(--border); background: var(--bg);
+  }
+  #composer-inner { max-width: 720px; margin: 0 auto; display: flex; gap: 10px; align-items: flex-end; }
+  #chat-input { resize: none; max-height: 140px; }
+  #thinking { max-width: 720px; margin: 0 auto 14px; color: var(--muted); font-size: 13.5px; }
+  .dots::after { content: ""; animation: dots 1.4s steps(4, end) infinite; }
+  @keyframes dots { 0% { content: ""; } 25% { content: "."; } 50% { content: ".."; } 75% { content: "..."; } }
+
+  /* ---------- sidebar ---------- */
+  #sidebar {
+    width: 320px; flex-shrink: 0; border-left: 1px solid var(--border);
+    background: var(--panel); overflow-y: auto; padding: 18px;
+  }
+  .side-section h3 {
+    font-family: var(--font-mono); font-size: 11px; text-transform: uppercase;
+    letter-spacing: 0.09em; color: var(--muted); margin-bottom: 10px;
+  }
+  .side-section { margin-bottom: 26px; }
+  .profile-card { background: var(--panel-2); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; font-size: 13.5px; }
+  .profile-card .name { font-weight: 600; font-size: 15px; margin-bottom: 2px; }
+  .profile-card .meta { color: var(--muted); }
+  .profile-card .needs { margin-top: 8px; color: var(--muted); font-size: 12.5px; }
+  .rfq {
+    background: var(--panel-2); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 12px; margin-bottom: 10px; font-size: 13px;
+  }
+  .rfq .mat { font-weight: 600; font-size: 13.5px; }
+  .rfq .sup { color: var(--muted); }
+  .rfq .status {
+    display: inline-block; margin-top: 6px; font-size: 11px; padding: 2px 8px;
+    border-radius: 999px; background: rgba(46,125,79,0.12); color: var(--green);
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .empty { color: var(--muted); font-size: 13px; }
+
+  /* ---------- profile modal ---------- */
+  #modal-backdrop {
+    position: fixed; inset: 0; background: rgba(35,40,43,0.35);
+    display: flex; align-items: center; justify-content: center; z-index: 10;
+  }
+  .modal {
+    width: 100%; max-width: 460px; background: var(--panel);
+    border: 1px solid var(--border); border-radius: 16px; padding: 26px;
+    box-shadow: 0 12px 36px rgba(35, 40, 43, 0.12);
+  }
+  .modal h2 { font-size: 17px; margin-bottom: 16px; }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 18px; }
+
+  @media (max-width: 860px) {
+    #sidebar { display: none; }
+    #chat-scroll, #composer { padding-left: 16px; padding-right: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== Auth ===== -->
+<div id="auth-view">
+  <div class="hero-copy">
+    <div class="logo">Forge<span>Link</span></div>
+    <h1>Sourcing built for engineering teams.</h1>
+    <p>Find materials and components across seven regions, compare true landed cost and lead time, and send RFQs in minutes, not weeks.</p>
+    <div class="hero-points">
+      <div>14 SUPPLIERS · 7 REGIONS · VERIFIED RATINGS</div>
+      <div>AI COMPARISON ON PRICE, MOQ + DELIVERY</div>
+      <div>RFQS FILED AND TRACKED FOR YOU</div>
+    </div>
+  </div>
+  <div class="auth-card">
+    <div class="card-label">Business portal</div>
+    <div class="tagline">Sign in or create your company account</div>
+
+    <form id="login-form">
+      <div class="field"><label>Email</label><input type="email" id="login-email" autocomplete="email" required></div>
+      <div class="field"><label>Password</label><input type="password" id="login-password" autocomplete="current-password" required></div>
+      <div class="form-error" id="login-error"></div>
+      <button class="btn" style="width:100%">Sign in</button>
+      <div class="auth-switch">New here? <a id="show-signup">Create a business account</a></div>
+    </form>
+
+    <form id="signup-form" class="hidden">
+      <div class="row2">
+        <div class="field"><label>Email</label><input type="email" id="su-email" autocomplete="email" required></div>
+        <div class="field"><label>Password (8+ chars)</label><input type="password" id="su-password" autocomplete="new-password" required minlength="8"></div>
+      </div>
+      <div class="field"><label>Company name</label><input id="su-company" required placeholder="e.g. Delta Precision Machining"></div>
+      <div class="row2">
+        <div class="field"><label>Industry</label><input id="su-industry" placeholder="e.g. CNC machining"></div>
+        <div class="field"><label>Country</label><input id="su-country" placeholder="e.g. USA"></div>
+      </div>
+      <div class="field"><label>Region</label>
+        <select id="su-region">
+          <option>North America</option><option>South America</option><option>Europe</option>
+          <option>Middle East</option><option>Africa</option><option>Asia</option><option>Oceania</option>
+        </select>
+      </div>
+      <div class="field"><label>What do you typically buy?</label>
+        <textarea id="su-needs" rows="2" placeholder="e.g. aluminum plate, fasteners, bearings for spindle assemblies"></textarea>
+      </div>
+      <div class="form-error" id="signup-error"></div>
+      <button class="btn" style="width:100%">Create account</button>
+      <div class="auth-switch">Already registered? <a id="show-login">Sign in</a></div>
+    </form>
+  </div>
+</div>
+
+<!-- ===== App ===== -->
+<div id="app-view" class="hidden">
+  <header>
+    <div class="logo">Forge<span>Link</span></div>
+    <div class="company" id="header-company"></div>
+    <button class="btn-ghost" id="edit-profile-btn">Profile</button>
+    <button class="btn-ghost" id="new-chat-btn" title="Clear conversation">New chat</button>
+    <button class="btn-ghost" id="logout-btn">Sign out</button>
+  </header>
+  <main>
+    <div id="chat-panel">
+      <div id="chat-scroll">
+        <div id="welcome">
+          <h2>What do you need to source?</h2>
+          <p>I search suppliers across seven regions, compare landed lead times and real costs, and can send RFQs for you.</p>
+          <div class="suggestions">
+            <button class="suggestion">Find 6061 aluminum plate near me</button>
+            <button class="suggestion">Cheapest M12 class 8.8 bolts, need 5,000</button>
+            <button class="suggestion">Compare 6205 bearing suppliers on price vs. delivery</button>
+            <button class="suggestion">I need hydraulic cylinders within 3 weeks</button>
+          </div>
+        </div>
+        <div id="messages"></div>
+        <div id="thinking" class="hidden"><span class="dots">Searching suppliers</span></div>
+      </div>
+      <div id="composer">
+        <div id="composer-inner">
+          <textarea id="chat-input" rows="1" placeholder="Describe what you need: material, specs, quantity, deadline…"></textarea>
+          <button class="btn" id="send-btn">Send</button>
+        </div>
+      </div>
+    </div>
+    <aside id="sidebar">
+      <div class="side-section">
+        <h3>Your business</h3>
+        <div class="profile-card" id="profile-card"></div>
+      </div>
+      <div class="side-section">
+        <h3>Your RFQs</h3>
+        <div id="rfq-list"><div class="empty">No RFQs yet. Ask the assistant to request quotes.</div></div>
+      </div>
+    </aside>
+  </main>
+</div>
+
+<!-- ===== Profile modal ===== -->
+<div id="modal-backdrop" class="hidden">
+  <div class="modal">
+    <h2>Business profile</h2>
+    <div class="field"><label>Company name</label><input id="pf-name"></div>
+    <div class="row2">
+      <div class="field"><label>Industry</label><input id="pf-industry"></div>
+      <div class="field"><label>Country</label><input id="pf-country"></div>
+    </div>
+    <div class="field"><label>Region</label>
+      <select id="pf-region">
+        <option>North America</option><option>South America</option><option>Europe</option>
+        <option>Middle East</option><option>Africa</option><option>Asia</option><option>Oceania</option>
+      </select>
+    </div>
+    <div class="field"><label>Typical needs</label><textarea id="pf-needs" rows="2"></textarea></div>
+    <div class="form-error" id="pf-error"></div>
+    <div class="modal-actions">
+      <button class="btn-ghost" id="pf-cancel">Cancel</button>
+      <button class="btn" id="pf-save">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+let me = null;
+
+async function api(path, opts = {}) {
+  let res;
+  try {
+    res = await fetch(path, {
+      headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
+      ...opts,
+      body: opts.body ? JSON.stringify(opts.body) : undefined,
+    });
+  } catch {
+    throw new Error("Can't reach the ForgeLink server. Make sure it's running (npm start), then reload this page.");
+  }
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
+  return data;
+}
+
+/* ---------- tiny markdown renderer (bold, italic, code, bullets) ---------- */
+function esc(s) { return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+function inline(s) {
+  return esc(s)
+    .replace(/\*\*(.+?)\*\*/g, "<b>$1</b>")
+    .replace(/`([^`]+)`/g, "<code>$1</code>")
+    .replace(/(^|[\s(])\*([^*\n]+)\*(?=[\s).,;:!?]|$)/g, "$1<i>$2</i>");
+}
+function renderMarkdown(text) {
+  const lines = text.split("\n");
+  let html = "", inList = false, para = [];
+  const flushPara = () => { if (para.length) { html += `<p>${inline(para.join(" "))}</p>`; para = []; } };
+  const closeList = () => { if (inList) { html += "</ul>"; inList = false; } };
+  for (const raw of lines) {
+    const line = raw.trimEnd();
+    const bullet = line.match(/^\s*[-*•]\s+(.*)/);
+    if (bullet) {
+      flushPara();
+      if (!inList) { html += "<ul>"; inList = true; }
+      html += `<li>${inline(bullet[1])}</li>`;
+    } else if (line.trim() === "") {
+      flushPara(); closeList();
+    } else {
+      closeList(); para.push(line.trim());
+    }
+  }
+  flushPara(); closeList();
+  return html;
+}
+
+/* ---------- chat rendering ---------- */
+const stepLabels = {
+  search_materials: (i) => `Searched catalog${i.query ? `: <b>${esc(i.query)}</b>` : ""}${i.category ? ` in ${esc(i.category)}` : ""}`,
+  get_supplier: () => "Checked supplier profile",
+  create_rfq: (i) => `Filed RFQ <b>×${i.quantity ?? "?"}</b>`,
+};
+
+function addMessage(role, text, steps) {
+  $("welcome").classList.add("hidden");
+  const wrap = $("messages");
+  if (steps && steps.length) {
+    const s = document.createElement("div");
+    s.className = "steps";
+    s.innerHTML = steps.map((st) => `<span class="step-chip">${(stepLabels[st.tool] || (() => esc(st.tool)))(st.input || {})}</span>`).join("");
+    wrap.appendChild(s);
+  }
+  const div = document.createElement("div");
+  div.className = `msg ${role}`;
+  div.innerHTML = `<div class="who">${role === "user" ? "You" : "ForgeLink"}</div><div class="bubble">${role === "user" ? esc(text) : renderMarkdown(text)}</div>`;
+  wrap.appendChild(div);
+  $("chat-scroll").scrollTop = $("chat-scroll").scrollHeight;
+}
+
+let sending = false;
+async function sendMessage(text) {
+  if (sending || !text.trim()) return;
+  sending = true;
+  $("send-btn").disabled = true;
+  addMessage("user", text.trim());
+  $("chat-input").value = "";
+  autosize();
+  $("thinking").classList.remove("hidden");
+  $("chat-scroll").scrollTop = $("chat-scroll").scrollHeight;
+  try {
+    const data = await api("/api/chat", { method: "POST", body: { message: text.trim() } });
+    $("thinking").classList.add("hidden");
+    addMessage("assistant", data.text || "(no response)", data.steps);
+    if ((data.steps || []).some((s) => s.tool === "create_rfq")) loadRfqs();
+  } catch (err) {
+    $("thinking").classList.add("hidden");
+    addMessage("assistant", `⚠️ ${err.message}`);
+  } finally {
+    sending = false;
+    $("send-btn").disabled = false;
+    $("chat-input").focus();
+  }
+}
+
+function autosize() {
+  const el = $("chat-input");
+  el.style.height = "auto";
+  el.style.height = Math.min(el.scrollHeight, 140) + "px";
+}
+
+/* ---------- sidebar ---------- */
+function renderProfile() {
+  const b = me.business;
+  $("header-company").textContent = `${b.name} · ${b.region}`;
+  $("profile-card").innerHTML = `
+    <div class="name">${esc(b.name)}</div>
+    <div class="meta">${esc(b.industry || "Industry not set")}</div>
+    <div class="meta">${esc(b.country ? b.country + " · " : "")}${esc(b.region)}</div>
+    ${b.needs ? `<div class="needs">Buys: ${esc(b.needs)}</div>` : ""}`;
+}
+
+async function loadRfqs() {
+  const { rfqs } = await api("/api/rfqs");
+  const list = $("rfq-list");
+  if (!rfqs.length) {
+    list.innerHTML = '<div class="empty">No RFQs yet. Ask the assistant to request quotes.</div>';
+    return;
+  }
+  list.innerHTML = rfqs.map((r) => `
+    <div class="rfq">
+      <div class="mat">${esc(r.material)}</div>
+      <div class="sup">${esc(r.supplier)} · ${esc(r.country)}</div>
+      <div>${r.quantity} ${esc(r.unit)}(s) · ~$${(r.quantity * r.price_per_unit).toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
+      <span class="status">${esc(r.status)}</span>
+    </div>`).join("");
+}
+
+async function loadChatHistory() {
+  const { messages } = await api("/api/chat");
+  for (const m of messages) addMessage(m.role, m.text);
+}
+
+/* ---------- boot / auth ---------- */
+async function boot() {
+  try {
+    me = await api("/api/me");
+    $("auth-view").classList.add("hidden");
+    $("app-view").classList.remove("hidden");
+    renderProfile();
+    loadRfqs();
+    await loadChatHistory();
+    $("chat-input").focus();
+  } catch {
+    $("auth-view").classList.remove("hidden");
+    $("app-view").classList.add("hidden");
+  }
+}
+
+$("show-signup").onclick = () => { $("login-form").classList.add("hidden"); $("signup-form").classList.remove("hidden"); };
+$("show-login").onclick = () => { $("signup-form").classList.add("hidden"); $("login-form").classList.remove("hidden"); };
+
+$("login-form").onsubmit = async (e) => {
+  e.preventDefault();
+  $("login-error").textContent = "";
+  try {
+    await api("/api/login", { method: "POST", body: { email: $("login-email").value, password: $("login-password").value } });
+    boot();
+  } catch (err) { $("login-error").textContent = err.message; }
+};
+
+$("signup-form").onsubmit = async (e) => {
+  e.preventDefault();
+  $("signup-error").textContent = "";
+  try {
+    await api("/api/signup", { method: "POST", body: {
+      email: $("su-email").value, password: $("su-password").value,
+      company: $("su-company").value, industry: $("su-industry").value,
+      region: $("su-region").value, country: $("su-country").value, needs: $("su-needs").value,
+    }});
+    boot();
+  } catch (err) { $("signup-error").textContent = err.message; }
+};
+
+$("logout-btn").onclick = async () => { await api("/api/logout", { method: "POST" }); location.reload(); };
+
+$("new-chat-btn").onclick = async () => {
+  if (!confirm("Clear this conversation? The assistant will forget the chat history.")) return;
+  await api("/api/chat/reset", { method: "POST" });
+  $("messages").innerHTML = "";
+  $("welcome").classList.remove("hidden");
+};
+
+/* ---------- profile modal ---------- */
+$("edit-profile-btn").onclick = () => {
+  const b = me.business;
+  $("pf-name").value = b.name; $("pf-industry").value = b.industry;
+  $("pf-region").value = b.region; $("pf-country").value = b.country; $("pf-needs").value = b.needs;
+  $("pf-error").textContent = "";
+  $("modal-backdrop").classList.remove("hidden");
+};
+$("pf-cancel").onclick = () => $("modal-backdrop").classList.add("hidden");
+$("pf-save").onclick = async () => {
+  try {
+    await api("/api/profile", { method: "PUT", body: {
+      name: $("pf-name").value, industry: $("pf-industry").value,
+      region: $("pf-region").value, country: $("pf-country").value, needs: $("pf-needs").value,
+    }});
+    me = await api("/api/me");
+    renderProfile();
+    $("modal-backdrop").classList.add("hidden");
+  } catch (err) { $("pf-error").textContent = err.message; }
+};
+
+/* ---------- composer events ---------- */
+$("send-btn").onclick = () => sendMessage($("chat-input").value);
+$("chat-input").addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage($("chat-input").value); }
+});
+$("chat-input").addEventListener("input", autosize);
+document.querySelectorAll(".suggestion").forEach((btn) => {
+  btn.onclick = () => sendMessage(btn.textContent);
+});
+
+boot();
+</script>
+</body>
+</html>

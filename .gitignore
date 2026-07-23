@@ -1,0 +1,21 @@
+# Secrets
+.env
+
+# Dependencies
+node_modules/
+
+# Local data & logs
+forgelink.db*
+server.log
+uploads/
+
+# Build output
+dist/
+build/
+
+# OS / editor / AI tooling
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+.claude/
