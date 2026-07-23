@@ -2,9 +2,6 @@
 
 **AI-powered B2B materials sourcing assistant for engineering teams.** Businesses describe what they need in plain language; a Claude-powered assistant searches a multi-region supplier catalog, compares real landed cost and delivery time, and files requests-for-quote (RFQs) on their behalf.
 
-![ForgeLink screenshot](docs/screenshot.png)
-*(Screenshot coming soon: landing page, chat with tool-activity chips, and RFQ tracker.)*
-
 ## How it works
 
 1. **Sign up with a business profile.** Company, industry, region, and typical sourcing needs. The profile is injected into the assistant's system prompt so recommendations account for where you are and what you buy.
